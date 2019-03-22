@@ -2,7 +2,7 @@ package si.iitech.price.parser;
 
 import org.jsoup.nodes.Document;
 
-import si.iitech.parser.IParser;
+import si.iitech.lib.parser.IParser;
 
 public interface IPriceParser extends IParser {
 

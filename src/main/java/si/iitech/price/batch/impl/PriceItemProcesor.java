@@ -3,11 +3,10 @@ package si.iitech.price.batch.impl;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import si.iitech.price.entities.impl.EtPrice;
-import si.iitech.price.entities.impl.EtPriceSource;
-import si.iitech.price.entities.impl.EtProduct;
+import si.iitech.lib.util.DateUtils;
+import si.iitech.price.entity.impl.EtPrice;
+import si.iitech.price.entity.impl.EtProduct;
 import si.iitech.price.service.impl.ProductService;
-import si.iitech.util.DateUtils;
 
 public class PriceItemProcesor implements ItemProcessor<EtProduct, EtPrice> {
 
@@ -16,8 +15,7 @@ public class PriceItemProcesor implements ItemProcessor<EtProduct, EtPrice> {
 
 	@Override
 	public EtPrice process(EtProduct product) throws Exception {
-		EtPriceSource sourceOid = product.getPriceSource();
-		Double productPrice = productService.parseProductPrice(sourceOid.getOid(), product.getUrl());
+		Double productPrice = productService.parseProductPrice(product.getUrl());
 		EtPrice price = new EtPrice();
 		price.setPrice(productPrice);
 		price.setPriceDate(DateUtils.getNow());

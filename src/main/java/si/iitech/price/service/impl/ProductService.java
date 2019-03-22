@@ -1,5 +1,7 @@
 package si.iitech.price.service.impl;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 
 import org.jsoup.nodes.Document;
@@ -7,15 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import si.iitech.exception.impl.WebParserException;
-import si.iitech.price.entities.impl.EtPrice;
-import si.iitech.price.entities.impl.EtPriceSource;
-import si.iitech.price.entities.impl.EtProduct;
+import si.iitech.lib.exception.impl.WebParserException;
+import si.iitech.lib.util.WebParser;
+import si.iitech.price.entity.impl.EtPrice;
+import si.iitech.price.entity.impl.EtPriceSource;
+import si.iitech.price.entity.impl.EtProduct;
+import si.iitech.price.exception.impl.PriceException;
 import si.iitech.price.exception.impl.PriceRuntimeException;
 import si.iitech.price.repository.PriceRepository;
 import si.iitech.price.repository.PriceSourceRepository;
 import si.iitech.price.repository.ProductRepository;
-import si.iitech.util.WebParser;
 
 @Service
 public class ProductService {
@@ -29,26 +32,42 @@ public class ProductService {
 	@Autowired
 	private PriceRepository priceRepository;
 
-	public String parseProductTitle(Long sourceOid, String url) throws WebParserException {
-		EtPriceSource priceSource = getPriceSource(sourceOid);
+	public String parseProductTitle(String url) throws WebParserException, PriceException {
+		EtPriceSource priceSource = getPriceSourceFromProductUrl(url);
 		Document document = WebParser.createInstance().readWebSite(url);
 		return priceSource.getParserClassInstance().getTitle(document);
 	}
 
-	public Double parseProductPrice(Long sourceOid, String url) throws WebParserException {
-		EtPriceSource priceSource = getPriceSource(sourceOid);
+	public Double parseProductPrice(String url) throws WebParserException, PriceException {
+		EtPriceSource priceSource = getPriceSourceFromProductUrl(url);
 		Document document = WebParser.createInstance().readWebSite(url);
 		return priceSource.getParserClassInstance().getPrice(document);
 	}
-
+	
 	@Transactional
-	public EtProduct saveProduct(Long sourceOid, EtProduct product) {
+	public EtProduct newProduct(EtProduct product) throws PriceException, WebParserException {
 		EtProduct existingProduct = productRepository.findByUrl(product.getUrl());
 		if (existingProduct != null)
 			return existingProduct;
-		EtPriceSource priceSource = getPriceSource(sourceOid);
-		priceSource.addProduct(product);
+		EtPriceSource priceSource = getPriceSourceFromProductUrl(product.getUrl());
+		String title = parseProductTitle(product.getUrl());
+		product.setTitle(title);
+		product.setPriceSource(priceSource);
 		return productRepository.save(product);
+	}
+
+	public EtPriceSource getPriceSourceFromProductUrl(String productUrl) throws PriceException {
+		URL url = null;
+		try {
+			url = new URL(productUrl);
+		} catch (MalformedURLException e) {
+			throw new PriceException("Invalid product url!");
+		}
+		EtPriceSource priceSource = priceSourceRepository.findByUrl(url.getHost());
+		if(priceSource == null) {
+			throw new PriceException("Source not found!");
+		}
+		return priceSource;
 	}
 
 	@Transactional
@@ -63,14 +82,6 @@ public class ProductService {
 		return priceRepository.findFirstByProductOidOrderByPriceDateDesc(productOid);
 	}
 
-	private EtPriceSource getPriceSource(Long sourceOid) {
-		Optional<EtPriceSource> priceSourceOptional = priceSourceRepository.findById(sourceOid);
-		if (!priceSourceOptional.isPresent())
-			throw new PriceRuntimeException("Price source is not found!");
-		EtPriceSource priceSource = priceSourceOptional.get();
-		return priceSource;
-	}
-
 	private EtProduct getProduct(Long productOid) {
 		Optional<EtProduct> productOptional = productRepository.findById(productOid);
 		if (!productOptional.isPresent())
@@ -78,5 +89,4 @@ public class ProductService {
 		EtProduct product = productOptional.get();
 		return product;
 	}
-
 }

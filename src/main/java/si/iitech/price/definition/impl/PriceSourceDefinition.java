@@ -1,6 +1,6 @@
 package si.iitech.price.definition.impl;
 
-import si.iitech.price.entities.impl.EtPriceSource;
+import si.iitech.price.entity.impl.EtPriceSource;
 
 public abstract class PriceSourceDefinition {
 	

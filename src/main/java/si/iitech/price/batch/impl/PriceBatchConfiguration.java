@@ -15,8 +15,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort.Direction;
 
-import si.iitech.price.entities.impl.EtPrice;
-import si.iitech.price.entities.impl.EtProduct;
+import si.iitech.price.entity.impl.EtPrice;
+import si.iitech.price.entity.impl.EtProduct;
 import si.iitech.price.repository.PriceRepository;
 import si.iitech.price.repository.ProductRepository;
 
@@ -62,12 +62,23 @@ public class PriceBatchConfiguration {
 
 	@Bean
 	public Step step1(RepositoryItemWriter<EtPrice> writer) {
-		return stepBuilderFactory.get("step1").<EtProduct, EtPrice>chunk(10).reader(reader()).processor(processor())
-				.writer(writer).build();
+		return stepBuilderFactory
+				.get("step1")
+				.<EtProduct, EtPrice>chunk(10)
+				.reader(reader())
+				.processor(processor())
+				.faultTolerant()
+				.writer(writer)
+				.build();
 	}
 
 	@Bean(name = "priceBatch")
 	public Job importUserJob(Step step1) {
-		return jobBuilderFactory.get("priceBatch").incrementer(new RunIdIncrementer()).flow(step1).end().build();
+		return jobBuilderFactory
+				.get("priceBatch")
+				.incrementer(new RunIdIncrementer())
+				.flow(step1)
+				.end()
+				.build();
 	}
 }

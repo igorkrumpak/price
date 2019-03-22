@@ -1,4 +1,4 @@
-package si.iitech.price.entities.impl;
+package si.iitech.price.entity.impl;
 
 import java.util.Date;
 
@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
-import si.iitech.entity.EtEntity;
+import si.iitech.lib.entity.EtEntity;
 
 @Entity(name = "PRICE")
 public class EtPrice extends EtEntity {
@@ -20,7 +20,7 @@ public class EtPrice extends EtEntity {
 		super();
 	}
 
-	@Column(nullable = false, precision = 2)
+	@Column(precision = 2)
 	public Double getPrice() {
 		return price;
 	}

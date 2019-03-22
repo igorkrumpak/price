@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import si.iitech.price.entities.impl.EtPriceSource;
+import si.iitech.price.entity.impl.EtPriceSource;
 import si.iitech.price.repository.PriceSourceRepository;
 
 @Component

@@ -1,4 +1,4 @@
-package si.iitech.price.entities.impl;
+package si.iitech.price.entity.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
-import si.iitech.entity.EtSource;
+import si.iitech.lib.entity.EtSource;
 import si.iitech.price.parser.IPriceParser;
 
 @Entity(name = "PRICE_SOURCE")

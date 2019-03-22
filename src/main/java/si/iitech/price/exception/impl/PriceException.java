@@ -7,4 +7,8 @@ public class PriceException extends Exception {
 	public PriceException(Throwable throwable) {
 		super(throwable);
 	}
+	
+	public PriceException(String message) {
+		super(message);
+	}
 }

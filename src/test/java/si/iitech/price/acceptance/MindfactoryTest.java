@@ -20,14 +20,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import si.iitech.exception.impl.WebParserException;
+import si.iitech.lib.exception.impl.WebParserException;
+import si.iitech.lib.util.DateUtils;
 import si.iitech.price.definition.impl.MindfactoryDefinition;
-import si.iitech.price.entities.impl.EtPrice;
-import si.iitech.price.entities.impl.EtPriceSource;
-import si.iitech.price.entities.impl.EtProduct;
+import si.iitech.price.entity.impl.EtPrice;
+import si.iitech.price.entity.impl.EtPriceSource;
+import si.iitech.price.entity.impl.EtProduct;
+import si.iitech.price.exception.impl.PriceException;
 import si.iitech.price.repository.PriceSourceRepository;
 import si.iitech.price.service.impl.ProductService;
-import si.iitech.util.DateUtils;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -47,58 +48,59 @@ public class MindfactoryTest {
 	private Job job;
 
 	@Test
-	public void testAddProductsAndPrices() throws WebParserException {
-		EtPriceSource mindfactoryPriceSource = priceSourceRepository.findByTitle(MindfactoryDefinition.TITLE);
-		assertNotNull(mindfactoryPriceSource);
-
-		addProductAndPrice(mindfactoryPriceSource,
-				"https://www.mindfactory.de/product_info.php/Thermalright-ARO-M14-AMD-Ryzen-CPU-Kuehler-grau-Tower-Kuehler_1238354.html");
-		addProductAndPrice(mindfactoryPriceSource,
-				"https://www.mindfactory.de/product_info.php/6GB-KFA2-GeForce-GTX-1060-OC-Aktiv-PCIe-3-0-x16--Retail-_1286394.html");
-		addProductAndPrice(mindfactoryPriceSource,
-				"https://www.mindfactory.de/product_info.php/AMD-Ryzen-5-2600X-6x-3-60GHz-So-AM4-BOX_1233731.html");
-		addProductAndPrice(mindfactoryPriceSource,
-				"https://www.mindfactory.de/product_info.php/Notebook-17-3Zoll--43-94cm--Lenovo-V320-17IKB-i5-8250U-8-256SSD-FHD-mat_1276867.html");
+	public void testAddProductsAndPrices() throws WebParserException, PriceException {
+		addProductAndPrice(MindfactoryProduct.PRODUCT_1_URL);
+		addProductAndPrice(MindfactoryProduct.PRODUCT_2_URL);
+		addProductAndPrice(MindfactoryProduct.PRODUCT_3_URL);
+		addProductAndPrice(MindfactoryProduct.PRODUCT_4_URL);
 	}
 
 	@Test
-	public void testPriceBatch() throws WebParserException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
+	public void testPriceBatch() throws WebParserException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException, PriceException {
 		EtPriceSource mindfactoryPriceSource = priceSourceRepository.findByTitle(MindfactoryDefinition.TITLE);
 		assertNotNull(mindfactoryPriceSource);
-		EtProduct product1 = addProduct(mindfactoryPriceSource,
-				"https://www.mindfactory.de/product_info.php/Thermalright-ARO-M14-AMD-Ryzen-CPU-Kuehler-grau-Tower-Kuehler_1238354.html");
-		addProduct(mindfactoryPriceSource,
-				"https://www.mindfactory.de/product_info.php/6GB-KFA2-GeForce-GTX-1060-OC-Aktiv-PCIe-3-0-x16--Retail-_1286394.html");
-		addProduct(mindfactoryPriceSource,
-				"https://www.mindfactory.de/product_info.php/AMD-Ryzen-5-2600X-6x-3-60GHz-So-AM4-BOX_1233731.html");
-		addProduct(mindfactoryPriceSource,
-				"https://www.mindfactory.de/product_info.php/Notebook-17-3Zoll--43-94cm--Lenovo-V320-17IKB-i5-8250U-8-256SSD-FHD-mat_1276867.html");
+		EtProduct product1 = addProduct(MindfactoryProduct.PRODUCT_1_URL);
+		EtProduct product2 = addProduct(MindfactoryProduct.PRODUCT_2_URL);
+		EtProduct product3 = addProduct(MindfactoryProduct.PRODUCT_3_URL);
+		EtProduct product4 = addProduct(MindfactoryProduct.PRODUCT_4_URL);
 		JobParameters jobParameters = new JobParametersBuilder().toJobParameters();
 		JobExecution jobExecution = jobLauncher.run(job, jobParameters);
 		while(jobExecution.isRunning()) {
 			assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 		}
-		productService.getLatestPrice(product1.getOid());
+		assertNotNull(productService.getLatestPrice(product1.getOid()));
+		assertNotNull(productService.getLatestPrice(product2.getOid()));
+		assertNotNull(productService.getLatestPrice(product3.getOid()));
+		assertNotNull(productService.getLatestPrice(product4.getOid()));
+	}
+	
+	@Test
+	public void testGetProductSource() throws PriceException {
+		EtPriceSource productSource = productService.getPriceSourceFromProductUrl(MindfactoryProduct.PRODUCT_1_URL);
+		assertNotNull(productSource);
+		assertEquals(MindfactoryDefinition.URL, productSource.getUrl());
+	}
+	
+	@Test
+	public void testGetProductTitle() throws PriceException, WebParserException {
+		assertNotNull(productService.parseProductTitle(MindfactoryProduct.PRODUCT_1_URL));
 	}
 
-	private EtProduct addProduct(EtPriceSource priceSource, String url) throws WebParserException {
-		String productTitle = productService.parseProductTitle(priceSource.getOid(), url);
-		assertNotNull(productTitle);
-
+	private EtProduct addProduct(String url) throws WebParserException, PriceException {
 		EtProduct product = new EtProduct();
-		product.setTitle(productTitle);
 		product.setUrl(url);
-		return productService.saveProduct(priceSource.getOid(), product);
+		EtProduct newProduct = productService.newProduct(product);
+		assertNotNull(newProduct.getTitle());
+		return newProduct;
 	}
 
-	private void addProductAndPrice(EtPriceSource priceSource, String url) throws WebParserException {
-		EtProduct product = addProduct(priceSource, url);
+	private void addProductAndPrice(String url) throws WebParserException, PriceException {
+		EtProduct product = addProduct(url);
 
 		EtPrice price = new EtPrice();
 		price.setPriceDate(DateUtils.getNow());
 
-		Double productPrice = productService.parseProductPrice(priceSource.getOid(), url);
-		assertNotNull(productPrice);
+		Double productPrice = productService.parseProductPrice(url);
 
 		price.setPrice(productPrice);
 		productService.addPrice(product.getOid(), price);
