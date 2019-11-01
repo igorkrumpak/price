@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import si.iitech.price.entity.impl.EtPrice;
 import si.iitech.price.entity.impl.EtProduct;
@@ -21,6 +22,7 @@ import si.iitech.price.repository.PriceRepository;
 import si.iitech.price.repository.ProductRepository;
 
 @Configuration
+@EnableScheduling
 @EnableBatchProcessing
 public class PriceBatchConfiguration {
 
@@ -46,6 +48,7 @@ public class PriceBatchConfiguration {
 		RepositoryItemReader<EtProduct> reader = new RepositoryItemReader<>();
 		reader.setRepository(productRepository);
 		reader.setMethodName("findAll");
+		reader.setPageSize(10);
 		HashMap<String, Direction> sorts = new HashMap<>();
 		sorts.put("oid", Direction.DESC);
 		reader.setSort(sorts);
@@ -62,23 +65,12 @@ public class PriceBatchConfiguration {
 
 	@Bean
 	public Step step1(RepositoryItemWriter<EtPrice> writer) {
-		return stepBuilderFactory
-				.get("step1")
-				.<EtProduct, EtPrice>chunk(10)
-				.reader(reader())
-				.processor(processor())
-				.faultTolerant()
-				.writer(writer)
-				.build();
+		return stepBuilderFactory.get("step1").<EtProduct, EtPrice>chunk(10).reader(reader()).processor(processor())
+				.faultTolerant().writer(writer).build();
 	}
 
 	@Bean(name = "priceBatch")
 	public Job importUserJob(Step step1) {
-		return jobBuilderFactory
-				.get("priceBatch")
-				.incrementer(new RunIdIncrementer())
-				.flow(step1)
-				.end()
-				.build();
+		return jobBuilderFactory.get("priceBatch").incrementer(new RunIdIncrementer()).flow(step1).end().build();
 	}
 }

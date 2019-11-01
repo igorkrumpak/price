@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import si.iitech.lib.entity.EtEntity;
 
 @Entity(name = "PRICE")
@@ -38,6 +40,7 @@ public class EtPrice extends EtEntity {
 		this.priceDate = priceDate;
 	}
 
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	public EtProduct getProduct() {
 		return product;

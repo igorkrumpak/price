@@ -12,7 +12,7 @@ import si.iitech.lib.entity.EtUser;
 @Entity(name = "PRICE_USER")
 public class EtPriceUser extends EtUser {
 
-	private List<EtUserProduct> userProducts = new ArrayList<EtUserProduct>();
+	private List<EtSelectedProduct> selectedProducts = new ArrayList<EtSelectedProduct>();
 
 	public EtPriceUser() {
 		super();
@@ -23,11 +23,11 @@ public class EtPriceUser extends EtUser {
 	}
 
 	@ManyToMany(mappedBy = "user", fetch = FetchType.LAZY)
-	public List<EtUserProduct> getUserProducts() {
-		return userProducts;
+	public List<EtSelectedProduct> getSelectedProducts() {
+		return selectedProducts;
 	}
 
-	public void setUserProducts(List<EtUserProduct> userProducts) {
-		this.userProducts = userProducts;
+	public void setSelectedProducts(List<EtSelectedProduct> selectedProducts) {
+		this.selectedProducts = selectedProducts;
 	}
 }

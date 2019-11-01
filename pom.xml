@@ -10,6 +10,13 @@
 	</parent>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>si.iitech</groupId>
 			<artifactId>lib</artifactId>
@@ -19,10 +26,11 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
-	
+
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>

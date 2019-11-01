@@ -5,17 +5,17 @@ import javax.persistence.ManyToOne;
 
 import si.iitech.lib.entity.EtEntity;
 
-@Entity(name = "USER_PRODUCT")
-public class EtUserProduct extends EtEntity {
+@Entity(name = "SELECTED_PRODUCT")
+public class EtSelectedProduct extends EtEntity {
 
 	private EtPriceUser user;
 	private EtProduct product;
 	
-	public EtUserProduct() {
+	public EtSelectedProduct() {
 		super();
 	}
 
-	public EtUserProduct(EtPriceUser user, EtProduct product) {
+	public EtSelectedProduct(EtPriceUser user, EtProduct product) {
 		this();
 		this.user = user;
 		this.product = product;

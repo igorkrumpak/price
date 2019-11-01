@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -17,11 +16,10 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import si.iitech.lib.exception.impl.WebParserException;
 import si.iitech.lib.util.DateUtils;
+import si.iitech.price.PriceTest;
 import si.iitech.price.definition.impl.MindfactoryDefinition;
 import si.iitech.price.entity.impl.EtPrice;
 import si.iitech.price.entity.impl.EtPriceSource;
@@ -30,9 +28,7 @@ import si.iitech.price.exception.impl.PriceException;
 import si.iitech.price.repository.PriceSourceRepository;
 import si.iitech.price.service.impl.ProductService;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class MindfactoryTest {
+public class MindfactoryTest extends PriceTest {
 
 	@Autowired
 	private PriceSourceRepository priceSourceRepository;
@@ -68,13 +64,13 @@ public class MindfactoryTest {
 		while(jobExecution.isRunning()) {
 			assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
 		}
-		assertNotNull(productService.getLatestPrice(product1.getOid()));
-		assertNotNull(productService.getLatestPrice(product2.getOid()));
-		assertNotNull(productService.getLatestPrice(product3.getOid()));
-		assertNotNull(productService.getLatestPrice(product4.getOid()));
+		assertNotNull(productService.getLatestPrice(product1));
+		assertNotNull(productService.getLatestPrice(product2));
+		assertNotNull(productService.getLatestPrice(product3));
+		assertNotNull(productService.getLatestPrice(product4));
 	}
-	
 	@Test
+	
 	public void testGetProductSource() throws PriceException {
 		EtPriceSource productSource = productService.getPriceSourceFromProductUrl(MindfactoryProduct.PRODUCT_1_URL);
 		assertNotNull(productSource);
@@ -103,6 +99,6 @@ public class MindfactoryTest {
 		Double productPrice = productService.parseProductPrice(url);
 
 		price.setPrice(productPrice);
-		productService.addPrice(product.getOid(), price);
+		productService.newPrice(product);
 	}
 }

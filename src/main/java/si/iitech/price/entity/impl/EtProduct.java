@@ -22,7 +22,7 @@ public class EtProduct extends EtEntity {
 	private String url;
 	private EtPriceSource priceSource;
 	private List<EtPrice> prices = new ArrayList<EtPrice>();
-	private List<EtUserProduct> userProducts = new ArrayList<EtUserProduct>();
+	private List<EtSelectedProduct> selectedProducts = new ArrayList<EtSelectedProduct>();
 	
 	public EtProduct() {
 		super();
@@ -54,7 +54,7 @@ public class EtProduct extends EtEntity {
 	}
 
 	@JsonIgnore
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne
 	public EtPriceSource getPriceSource() {
 		return priceSource;
 	}
@@ -77,12 +77,13 @@ public class EtProduct extends EtEntity {
 		getPrices().add(price);
 	}
 	
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "product")
-	public List<EtUserProduct> getUserProducts() {
-		return userProducts;
+	public List<EtSelectedProduct> getSelectedProducts() {
+		return selectedProducts;
 	}
 	
-	public void setUserProducts(List<EtUserProduct> userProducts) {
-		this.userProducts = userProducts;
+	public void setSelectedProducts(List<EtSelectedProduct> selectedProducts) {
+		this.selectedProducts = selectedProducts;
 	}
 }

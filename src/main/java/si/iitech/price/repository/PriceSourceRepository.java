@@ -13,5 +13,4 @@ public interface PriceSourceRepository extends CrudRepository<EtPriceSource, Lon
 	public EtPriceSource findByTitle(String title);
 
 	public EtPriceSource findByUrl(String url);
-
 }
